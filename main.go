@@ -12,6 +12,12 @@ func init() {
 }
 
 func main() {
+	if os.Args[0] == "unc-fork" {
+		if err := fork(); err != nil {
+			log.Fatalf("Fork error: %v", err)
+		}
+		os.Exit(0)
+	}
 	args := os.Args[1:]
 	if len(args) == 0 {
 		args = []string{os.Getenv("SHELL")}
