@@ -3,17 +3,17 @@ package main
 import (
 	"os"
 
-	log "github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus"
 )
 
 func init() {
-	log.SetLevel(log.DebugLevel)
+	logrus.SetLevel(logrus.DebugLevel)
 }
 
 func main() {
 	if os.Args[0] == "unc-fork" {
 		if err := fork(); err != nil {
-			log.Fatalf("Fork error: %v", err)
+			logrus.Fatalf("Fork error: %v", err)
 		}
 		os.Exit(0)
 	}
@@ -27,6 +27,6 @@ func main() {
 		Gid:  os.Getgid(),
 	}
 	if err := c.Start(); err != nil {
-		log.Fatalf("Container start failed: %v", err)
+		logrus.Fatalf("Container start failed: %v", err)
 	}
 }
