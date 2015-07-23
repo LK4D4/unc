@@ -1,14 +1,13 @@
 package main
 
 import (
-	"log"
 	"os"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 )
 
 func init() {
-	logrus.SetLevel(logrus.DebugLevel)
+	log.SetLevel(log.DebugLevel)
 }
 
 func main() {
