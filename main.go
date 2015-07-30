@@ -1,13 +1,16 @@
 package main
 
 import (
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 )
 
 func init() {
 	logrus.SetLevel(logrus.DebugLevel)
+	rand.Seed(time.Now().UnixNano())
 }
 
 func main() {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/Sirupsen/logrus"
 )
+
+const ipTmpl = "10.100.42.%d/24"
 
 type Container struct {
 	Args []string
@@ -28,7 +31,8 @@ func (c *Container) Start() error {
 		Cloneflags: syscall.CLONE_NEWUSER |
 			syscall.CLONE_NEWPID |
 			syscall.CLONE_NEWUTS |
-			syscall.CLONE_NEWNS,
+			syscall.CLONE_NEWNS |
+			syscall.CLONE_NEWNET,
 		UidMappings: []syscall.SysProcIDMap{
 			{
 				ContainerID: 0,
@@ -44,7 +48,14 @@ func (c *Container) Start() error {
 			},
 		},
 	}
-	return cmd.Run()
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	logrus.Debugf("container PID: %d", cmd.Process.Pid)
+	if err := putIface(cmd.Process.Pid); err != nil {
+		return err
+	}
+	return cmd.Wait()
 }
 
 type Mount struct {
@@ -61,6 +72,7 @@ type Cfg struct {
 	Hostname string
 	Mounts   []Mount
 	Rootfs   string
+	IP       string
 }
 
 var defaultMountFlags = syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
@@ -160,6 +172,8 @@ func fillCfg() error {
 		return fmt.Errorf("Error get working dir: %v", err)
 	}
 	defaultCfg.Rootfs = wd
+	// choose ip
+	defaultCfg.IP = fmt.Sprintf(ipTmpl, rand.Intn(253)+2)
 	return nil
 }
 
@@ -169,6 +183,13 @@ func fork() error {
 		return err
 	}
 	if err := setup(defaultCfg); err != nil {
+		return err
+	}
+	lnk, err := waitForIface()
+	if err != nil {
+		return err
+	}
+	if err := setupIface(lnk, defaultCfg); err != nil {
 		return err
 	}
 	return execProc(defaultCfg)
