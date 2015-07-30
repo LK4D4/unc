@@ -21,12 +21,14 @@ func waitForIface() (netlink.Link, error) {
 			fmt.Printf("\n")
 			return nil, fmt.Errorf("failed to find veth interface in 5 seconds")
 		}
+		// get list of all interfaces
 		lst, err := netlink.LinkList()
 		if err != nil {
 			fmt.Printf("\n")
 			return nil, err
 		}
 		for _, l := range lst {
+			// if we found "veth" interface - it's time to continue setup
 			if l.Type() == "veth" {
 				fmt.Printf("\n")
 				return l, nil
