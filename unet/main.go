@@ -36,7 +36,7 @@ func createBridge() error {
 	// create *netlink.Bridge object
 	la := netlink.NewLinkAttrs()
 	la.Name = bridgeName
-	br := &netlink.Bridge{la}
+	br := &netlink.Bridge{LinkAttrs: la}
 	if err := netlink.LinkAdd(br); err != nil {
 		return fmt.Errorf("bridge creation: %v", err)
 	}

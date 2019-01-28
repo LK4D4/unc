@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"strconv"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 )
 
@@ -39,11 +40,15 @@ func waitForIface() (netlink.Link, error) {
 }
 
 func putIface(pid int) error {
+	logrus.Debugf("Putting veth interface into container")
 	cmd := exec.Command(suidNet, strconv.Itoa(pid))
-	out, err := cmd.CombinedOutput()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("unet: out: %s, err: %v", out, err)
+		return fmt.Errorf("unet: err: %v", err)
 	}
+	logrus.Debugf("Network setup done")
 	return nil
 }
 

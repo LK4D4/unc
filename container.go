@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 const ipTmpl = "10.100.42.%d/24"
@@ -19,6 +19,12 @@ type Container struct {
 	Gid  int
 }
 
+var defaultEnvironment = []string{
+	"HOME=/root",
+	"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+	"TERM=xterm",
+}
+
 func (c *Container) Start() error {
 	cmd := &exec.Cmd{
 		Path: os.Args[0],
@@ -27,6 +33,7 @@ func (c *Container) Start() error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.Env = defaultEnvironment
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Cloneflags: syscall.CLONE_NEWUSER |
 			syscall.CLONE_NEWPID |
